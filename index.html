@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>FinFlow</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -169,7 +169,8 @@
       right: 0;
       background: var(--surface);
       border-top: 1px solid var(--border);
-      padding: 8px 12px 24px; /* extra bottom for safe area */
+      padding: 8px 12px 24px;
+      /* extra bottom for safe area */
       justify-content: space-around;
       align-items: center;
       z-index: 100;
@@ -199,8 +200,14 @@
     }
 
     @media (max-width: 768px) {
+      body {
+        overflow: auto;
+        -webkit-text-size-adjust: 100%
+      }
+
       #app {
-        flex-direction: column
+        flex-direction: column;
+        height: 100dvh
       }
 
       .sidebar {
@@ -208,47 +215,233 @@
       }
 
       .mobile-header {
-        display: flex
+        display: flex;
+        position: sticky;
+        top: 0;
+        padding: 12px 16px env(safe-area-inset-right) env(safe-area-inset-left)
       }
 
       .bottom-nav {
-        display: flex
+        display: flex;
+        padding: 8px 8px calc(12px + env(safe-area-inset-bottom))
+      }
+
+      .m-nav-item {
+        gap: 3px;
+        font-size: 10px;
+        padding: 6px 4px;
+        min-width: 48px;
+        min-height: 44px
+      }
+
+      .m-nav-icon {
+        font-size: 20px
       }
 
       .main {
-        height: calc(100vh - 120px); /* header + bottom nav */
+        flex: 1;
+        height: auto;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column
       }
 
       .topbar {
-        padding: 10px 20px
+        padding: 10px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 10
+      }
+
+      .topbar-left h1 {
+        font-size: 16px
       }
 
       .content {
-        padding: 16px 20px 80px
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 14px 14px calc(80px + env(safe-area-inset-bottom))
       }
 
-      .g4, .g3, .g2 {
+      .g4 {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px
+      }
+
+      .g3 {
+        grid-template-columns: 1fr;
+        gap: 10px
+      }
+
+      .g2 {
         grid-template-columns: 1fr;
         gap: 12px
       }
 
-      .card-value {
-        font-size: 22px
+      .card {
+        padding: 14px
       }
-      
+
+      .card-label {
+        font-size: 10px
+      }
+
+      .card-value {
+        font-size: 20px
+      }
+
+      .card-sub {
+        font-size: 10px
+      }
+
+      .chart-wrap {
+        height: 200px
+      }
+
+      .modal-overlay {
+        align-items: flex-end
+      }
+
       .modal {
         width: 100%;
-        height: 100%;
-        max-height: 100%;
-        border-radius: 0;
-        margin-top: 0
+        max-width: 100%;
+        max-height: 92vh;
+        border-radius: 16px 16px 0 0;
+        padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+        animation: slideUp .25s ease-out
       }
-      
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(100%)
+        }
+
+        to {
+          transform: translateY(0)
+        }
+      }
+
+      .fg-row {
+        grid-template-columns: 1fr;
+        gap: 0
+      }
+
+      input,
+      select,
+      textarea {
+        font-size: 16px;
+        padding: 10px 12px;
+        min-height: 44px
+      }
+
+      .btn {
+        min-height: 44px;
+        padding: 10px 16px;
+        font-size: 14px
+      }
+
+      .btn-sm {
+        min-height: 36px;
+        padding: 6px 12px;
+        font-size: 13px
+      }
+
+      .btn-xs {
+        min-height: 32px;
+        padding: 4px 10px;
+        font-size: 12px
+      }
+
       table {
         display: block;
         overflow-x: auto;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch
+      }
+
+      th {
+        font-size: 10px;
+        padding: 6px 8px
+      }
+
+      td {
+        font-size: 12px;
+        padding: 8px
+      }
+
+      .schedule-row {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px
+      }
+
+      .section-header {
+        flex-wrap: wrap;
+        gap: 8px
+      }
+
+      .toggle-group {
+        flex-wrap: wrap;
+        gap: 6px
+      }
+
+      .toggle {
+        padding: 6px 12px;
+        font-size: 12px
+      }
+
+      .tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        flex-wrap: nowrap
+      }
+
+      .tab {
+        white-space: nowrap;
+        padding: 6px 12px;
+        font-size: 12px
+      }
+
+      .toast {
+        left: 14px;
+        right: 14px;
+        bottom: calc(80px + env(safe-area-inset-bottom));
+        max-width: none
+      }
+
+      .auth-card {
+        padding: 28px 20px;
+        border-radius: var(--r);
+        width: 100%;
+        max-width: 95vw
+      }
+
+      .auth-logo {
+        font-size: 20px;
+        margin-bottom: 22px
+      }
+    }
+
+    /* Extra small phones */
+    @media (max-width: 380px) {
+      .g4 {
+        grid-template-columns: 1fr;
+        gap: 8px
+      }
+
+      .card-value {
+        font-size: 18px
+      }
+
+      .content {
+        padding: 12px 10px calc(80px + env(safe-area-inset-bottom))
+      }
+
+      .m-nav-item {
+        font-size: 9px
       }
     }
 
@@ -888,7 +1081,10 @@
       <button class="nav-item" onclick="showPage('budget')"><span class="nav-icon">▤</span>Budget</button>
       <button class="nav-item" onclick="showPage('goals')"><span class="nav-icon">◎</span>Goals</button>
       <button class="nav-item" onclick="showPage('reports')"><span class="nav-icon">◱</span>Reports</button>
-          </div>
+      <div class="sidebar-footer">
+        <button class="user-pill" onclick="doSignOut()">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <span id="user-name">User</span>
         </button>
       </div>
     </nav>
@@ -903,11 +1099,15 @@
 
     <!-- BOTTOM NAV -->
     <nav class="bottom-nav">
-      <button class="m-nav-item active" onclick="showPage('dashboard')"><span class="m-nav-icon">⊞</span><span>Home</span></button>
+      <button class="m-nav-item active" onclick="showPage('dashboard')"><span
+          class="m-nav-icon">⊞</span><span>Home</span></button>
       <button class="m-nav-item" onclick="showPage('income')"><span class="m-nav-icon">↓</span><span>In</span></button>
-      <button class="m-nav-item" onclick="showPage('expenses')"><span class="m-nav-icon">↑</span><span>Out</span></button>
-      <button class="m-nav-item" onclick="showPage('budget')"><span class="m-nav-icon">▤</span><span>Budget</span></button>
-      <button class="m-nav-item" onclick="showPage('goals')"><span class="m-nav-icon">◎</span><span>Goals</span></button>
+      <button class="m-nav-item" onclick="showPage('expenses')"><span
+          class="m-nav-icon">↑</span><span>Out</span></button>
+      <button class="m-nav-item" onclick="showPage('budget')"><span
+          class="m-nav-icon">▤</span><span>Budget</span></button>
+      <button class="m-nav-item" onclick="showPage('goals')"><span
+          class="m-nav-icon">◎</span><span>Goals</span></button>
     </nav>
 
     <main class="main">
@@ -1198,9 +1398,13 @@
       const pass = document.getElementById('l-pass').value;
       if (!email || !pass) return showAuthErr('Please enter your email and password.');
       setBtnLoading('login-btn', true);
-      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+      const { data: loginData, error } = await sb.auth.signInWithPassword({ email, password: pass });
       setBtnLoading('login-btn', false);
-      if (error) showAuthErr(error.message);
+      if (error) { showAuthErr(error.message); return; }
+      if (loginData?.session) {
+        user = loginData.session.user;
+        await showDashboard();
+      }
     }
 
     async function doSignup() {
@@ -1213,22 +1417,36 @@
       const { error } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
       setBtnLoading('signup-btn', false);
       if (error) { showAuthErr(error.message); return; }
-      document.getElementById('auth-ok').textContent = 'Account created! Check your email to confirm, then sign in.';
+      document.getElementById('auth-ok').textContent = 'Account created! You can now sign in.';
       document.getElementById('auth-ok').style.display = 'block';
+      authTab('login');
     }
 
     async function doSignOut() {
-      await sb.auth.signOut();
+      user = null;
+      data = { income: [], expenses: [], schedule: [], budgets: [], goals: [] };
       document.getElementById('app').classList.remove('show');
       document.getElementById('auth-screen').style.display = 'flex';
-      data = { income: [], expenses: [], schedule: [], budgets: [], goals: [] };
-      user = null;
+      try { await sb.auth.signOut(); } catch (e) { }
     }
 
     function showAuthErr(msg) {
       const el = document.getElementById('auth-err');
-      el.textContent = msg;
+      el.textContent = typeof msg === 'string' ? msg : JSON.stringify(msg);
       el.style.display = 'block';
+      document.getElementById('auth-ok').style.display = 'none';
+    }
+
+    async function showDashboard() {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('app').classList.add('show');
+      loading(true);
+      await loadAll();
+      loading(false);
+      const name = user.user_metadata?.full_name || user.email || 'User';
+      document.getElementById('user-name').textContent = name;
+      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+      renderDashboard();
     }
 
     // ══════════════════════════════════════════════
@@ -1259,9 +1477,9 @@
       document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
       document.querySelectorAll('.m-nav-item').forEach(e => e.classList.remove('active'));
-      
+
       document.getElementById('page-' + p).classList.add('active');
-      
+
       // Update sidebar
       document.querySelectorAll('.nav-item').forEach(e => {
         if (e.innerText.includes(PAGE_TITLES[p])) e.classList.add('active');
@@ -1682,7 +1900,7 @@
       // 2. Hard timeout (6s) — Safety net to prevent infinite spinner
       const safetyTimeout = setTimeout(() => {
         if (document.getElementById('loading-overlay').style.display !== 'none') {
-          console.warn('Boot timed out after 6s. Dropping to screen state.');
+          console.warn('Boot timed out after 6s.');
           loading(false);
           if (!user) {
             document.getElementById('app').classList.remove('show');
@@ -1691,35 +1909,46 @@
         }
       }, 6000);
 
-      // 3. Robust Session Check (Direct)
+      // 3. Auth Listener (register BEFORE getSession to catch all events)
+      let booting = true;
+      sb.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth event:', event);
+        // Skip during boot — getSession handles the initial state
+        if (booting) return;
+
+        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session) {
+          if (!user) {
+            user = session.user;
+            await showDashboard();
+          }
+        } else if (event === 'SIGNED_OUT') {
+          // Just reset UI — do NOT call doSignOut() to avoid loop
+          user = null;
+          data = { income: [], expenses: [], schedule: [], budgets: [], goals: [] };
+          document.getElementById('app').classList.remove('show');
+          document.getElementById('auth-screen').style.display = 'flex';
+        }
+      });
+
+      // 4. Check existing session
       try {
         const { data: { session } } = await sb.auth.getSession();
         if (session) {
           user = session.user;
-          const name = user.user_metadata?.full_name || user.email || 'User';
-          document.getElementById('user-name').textContent = name;
-          document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
-          
-          await loadAll();
-          document.getElementById('auth-screen').style.display = 'none';
-          document.getElementById('app').classList.add('show');
-          renderDashboard();
+          await showDashboard();
+        } else {
+          document.getElementById('app').classList.remove('show');
+          document.getElementById('auth-screen').style.display = 'flex';
         }
       } catch (err) {
         console.error('Session check failed:', err);
+        document.getElementById('app').classList.remove('show');
+        document.getElementById('auth-screen').style.display = 'flex';
       } finally {
         loading(false);
         clearTimeout(safetyTimeout);
+        booting = false;
       }
-
-      // 4. Background Auth Listener
-      sb.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN') {
-          location.reload(); // Refresh to ensure clean state
-        } else if (event === 'SIGNED_OUT') {
-          doSignOut();
-        }
-      });
     }
 
     boot();
