@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinFlow</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #0f0f11;
+      --surface: #17171a;
+      --surface2: #1f1f24;
+      --surface3: #27272d;
+      --border: rgba(255, 255, 255, 0.07);
+      --border2: rgba(255, 255, 255, 0.13);
+      --text: #f0f0f2;
+      --text2: #8a8a95;
+      --text3: #4a4a55;
+      --green: #22c55e;
+      --green-d: rgba(34, 197, 94, .13);
+      --red: #ef4444;
+      --red-d: rgba(239, 68, 68, .13);
+      --blue: #3b82f6;
+      --blue-d: rgba(59, 130, 246, .13);
+      --amber: #f59e0b;
+      --amber-d: rgba(245, 158, 11, .13);
+      --purple: #a855f7;
+      --purple-d: rgba(168, 85, 247, .13);
+      --accent: #6366f1;
+      --accent-d: rgba(99, 102, 241, .16);
+      --r: 12px;
+      --rs: 8px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden
+    }
+
+    /* ── AUTH SCREEN ── */
+    #auth-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--bg)
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      padding: 36px;
+      width: 380px;
+      max-width: 95vw
+    }
+
+    .auth-logo {
+      font-size: 22px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 28px;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px
+    }
+
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent)
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: var(--surface2);
+      border-radius: var(--rs);
+      padding: 3px;
+      margin-bottom: 24px
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 8px;
+      text-align: center;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text2);
+      border: none;
+      background: none;
+      font-family: inherit;
+      transition: all .15s
+    }
+
+    .auth-tab.active {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 500
+    }
+
+    .auth-err {
+      background: var(--red-d);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, .25);
+      border-radius: var(--rs);
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 14px;
+      display: none
+    }
+
+    .auth-success {
+      background: var(--green-d);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, .25);
+      border-radius: var(--rs);
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 14px;
+      display: none
+    }
+
+    /* ── APP SHELL ── */
+    #app {
+      display: none;
+      height: 100vh;
+      flex-direction: row
+    }
+
+    #app.show {
+      display: flex
+    }
+
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 18px 10px;
+      overflow-y: auto
+    }
+
+    .sidebar-logo {
+      font-size: 17px;
+      font-weight: 600;
+      padding: 4px 12px 18px;
+      letter-spacing: -.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .nav-section {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text3);
+      padding: 10px 12px 3px;
+      font-weight: 500
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 12px;
+      border-radius: var(--rs);
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 13px;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      transition: all .15s
+    }
+
+    .nav-item:hover {
+      background: var(--surface2);
+      color: var(--text)
+    }
+
+    .nav-item.active {
+      background: var(--accent-d);
+      color: var(--accent);
+      font-weight: 500
+    }
+
+    .nav-icon {
+      font-size: 14px;
+      width: 16px;
+      text-align: center
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border)
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: var(--rs);
+      cursor: pointer;
+      color: var(--text2);
+      font-size: 12px;
+      border: none;
+      background: none;
+      width: 100%;
+      font-family: inherit;
+      transition: all .15s
+    }
+
+    .user-pill:hover {
+      background: var(--surface2);
+      color: var(--text)
+    }
+
+    .user-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent-d);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      flex-shrink: 0
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden
+    }
+
+    .topbar {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      flex-shrink: 0
+    }
+
+    .topbar-left h1 {
+      font-size: 15px;
+      font-weight: 500
+    }
+
+    .topbar-left p {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 1px
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px 24px
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--rs);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      transition: opacity .15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .btn:hover {
+      opacity: .85
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text2);
+      border: 1px solid var(--border)
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--border2);
+      opacity: 1
+    }
+
+    .btn-danger {
+      background: var(--red)
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px
+    }
+
+    .btn-xs {
+      padding: 3px 8px;
+      font-size: 11px
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, .3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: inline-block
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 18px
+    }
+
+    .card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--text3);
+      font-weight: 500;
+      margin-bottom: 5px
+    }
+
+    .card-value {
+      font-size: 26px;
+      font-weight: 600;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: -1px
+    }
+
+    .card-sub {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 3px
+    }
+
+    .g4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 18px
+    }
+
+    .g3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px
+    }
+
+    .g2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 18px
+    }
+
+    /* ── TABLE ── */
+    table {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    th {
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--text3);
+      padding: 7px 10px;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border)
+    }
+
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px
+    }
+
+    tr:last-child td {
+      border-bottom: none
+    }
+
+    tr:hover td {
+      background: var(--surface2)
+    }
+
+    /* ── FORM ── */
+    .fg {
+      margin-bottom: 13px
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 4px;
+      font-weight: 500
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 8px 11px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .15s
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent)
+    }
+
+    select option {
+      background: var(--surface2)
+    }
+
+    .fg-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      backdrop-filter: blur(4px)
+    }
+
+    .modal-overlay.show {
+      display: flex
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      padding: 24px;
+      width: 440px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 18px
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 18px
+    }
+
+    /* ── MISC ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 500
+    }
+
+    .empty {
+      text-align: center;
+      padding: 36px;
+      color: var(--text3);
+      font-size: 13px
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 190px
+    }
+
+    .progress-bar {
+      height: 5px;
+      background: var(--surface3);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 7px
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .5s
+    }
+
+    .schedule-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px;
+      border-radius: var(--rs);
+      background: var(--surface2);
+      margin-bottom: 7px
+    }
+
+    .sched-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .tabs {
+      display: flex;
+      gap: 3px;
+      background: var(--surface2);
+      padding: 3px;
+      border-radius: var(--rs);
+      width: fit-content;
+      margin-bottom: 16px
+    }
+
+    .tab {
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text2);
+      border: none;
+      background: none;
+      font-family: inherit;
+      transition: all .15s
+    }
+
+    .tab.active {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 500
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 14px
+    }
+
+    .toggle {
+      padding: 4px 11px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text2);
+      background: none;
+      font-family: inherit;
+      transition: all .15s
+    }
+
+    .toggle.active {
+      background: var(--accent-d);
+      color: var(--accent);
+      border-color: var(--accent)
+    }
+
+    .page {
+      display: none
+    }
+
+    .page.active {
+      display: block
+    }
+
+    .text-green {
+      color: var(--green)
+    }
+
+    .text-red {
+      color: var(--red)
+    }
+
+    .text-muted {
+      color: var(--text2)
+    }
+
+    .mono {
+      font-family: 'DM Mono', monospace
+    }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      flex-direction: column;
+      gap: 14px;
+      font-size: 13px;
+      color: var(--text2)
+    }
+
+    .big-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--surface3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--rs);
+      padding: 12px 18px;
+      font-size: 13px;
+      z-index: 400;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .25s;
+      max-width: 320px
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1
+    }
+
+    .toast.ok {
+      border-color: rgba(34, 197, 94, .35);
+      color: var(--green)
+    }
+
+    .toast.err {
+      border-color: rgba(239, 68, 68, .35);
+      color: var(--red)
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOADING -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="big-spinner"></div>
+    <span>Loading FinFlow…</span>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast"></div>
+
+  <!-- AUTH -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-dot"></div>FinFlow
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="authTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="authTab('signup')">Create Account</button>
+      </div>
+      <div id="auth-err" class="auth-err"></div>
+      <div id="auth-ok" class="auth-success"></div>
+
+      <div id="login-form">
+        <div class="fg"><label>Email</label><input type="email" id="l-email" placeholder="you@example.com"></div>
+        <div class="fg"><label>Password</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+        <button class="btn" style="width:100%;justify-content:center" onclick="doLogin()" id="login-btn">Sign
+          In</button>
+      </div>
+
+      <div id="signup-form" style="display:none">
+        <div class="fg"><label>Full Name</label><input type="text" id="s-name" placeholder="Juan dela Cruz"></div>
+        <div class="fg"><label>Email</label><input type="email" id="s-email" placeholder="you@example.com"></div>
+        <div class="fg"><label>Password</label><input type="password" id="s-pass" placeholder="min. 6 characters"></div>
+        <button class="btn" style="width:100%;justify-content:center" onclick="doSignup()" id="signup-btn">Create
+          Account</button>
+      </div>
+
+      <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:18px">
+        Powered by Supabase · Your data is private & encrypted
+      </p>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>FinFlow
+      </div>
+      <div class="nav-section">Overview</div>
+      <button class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">⊞</span>Dashboard</button>
+      <div class="nav-section">Money</div>
+      <button class="nav-item" onclick="showPage('income')"><span class="nav-icon">↓</span>Income</button>
+      <button class="nav-item" onclick="showPage('expenses')"><span class="nav-icon">↑</span>Expenses</button>
+      <button class="nav-item" onclick="showPage('schedule')"><span class="nav-icon">◷</span>Schedule</button>
+      <div class="nav-section">Planning</div>
+      <button class="nav-item" onclick="showPage('budget')"><span class="nav-icon">▤</span>Budget</button>
+      <button class="nav-item" onclick="showPage('goals')"><span class="nav-icon">◎</span>Goals</button>
+      <button class="nav-item" onclick="showPage('reports')"><span class="nav-icon">◱</span>Reports</button>
+      <div class="sidebar-footer">
+        <button class="user-pill" onclick="doSignOut()">
+          <div class="user-avatar" id="user-avatar">?</div>
+          <div style="flex:1;text-align:left;overflow:hidden">
+            <div
+              style="font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+              id="user-name">User</div>
+            <div style="font-size:10px;color:var(--text3)">Sign out</div>
+          </div>
+        </button>
+      </div>
+    </nav>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1 id="page-title">Dashboard</h1>
+          <p id="top-date"></p>
+        </div>
+        <button class="btn" onclick="openAdd()" id="add-btn">+ Add</button>
+      </div>
+      <div class="content">
+
+        <!-- DASHBOARD -->
+        <div id="page-dashboard" class="page active">
+          <div class="g4">
+            <div class="card">
+              <div class="card-label">Net Balance</div>
+              <div class="card-value mono" id="d-bal">₱0</div>
+              <div class="card-sub" id="d-bal-sub">—</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Monthly Income</div>
+              <div class="card-value mono text-green" id="d-inc">₱0</div>
+              <div class="card-sub">this month</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Monthly Expenses</div>
+              <div class="card-value mono text-red" id="d-exp">₱0</div>
+              <div class="card-sub">this month</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Savings Rate</div>
+              <div class="card-value mono" id="d-sav">0%</div>
+              <div class="card-sub">of income saved</div>
+            </div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <div class="section-header">
+                <div class="section-title">Cash Flow (6 mo)</div>
+              </div>
+              <div class="chart-wrap"><canvas id="cf-chart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="section-header">
+                <div class="section-title">Expenses by Category</div>
+              </div>
+              <div class="chart-wrap" id="cat-chart-wrap"><canvas id="cat-chart"></canvas></div>
+            </div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <div class="section-header">
+                <div class="section-title">Recent Transactions</div><button class="btn btn-ghost btn-xs"
+                  onclick="showPage('expenses')">All →</button>
+              </div>
+              <div id="d-recent"></div>
+            </div>
+            <div class="card">
+              <div class="section-header">
+                <div class="section-title">Upcoming Scheduled</div><button class="btn btn-ghost btn-xs"
+                  onclick="showPage('schedule')">All →</button>
+              </div>
+              <div id="d-upcoming"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INCOME -->
+        <div id="page-income" class="page">
+          <div class="g3">
+            <div class="card">
+              <div class="card-label">This Month</div>
+              <div class="card-value mono text-green" id="inc-total">₱0</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Entries This Month</div>
+              <div class="card-value mono" id="inc-count">0</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Avg Per Entry</div>
+              <div class="card-value mono" id="inc-avg">₱0</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Income Records</div>
+            </div>
+            <div class="tabs" id="inc-tabs">
+              <button class="tab active" onclick="incTab('all',this)">All</button>
+              <button class="tab" onclick="incTab('Salary',this)">Salary</button>
+              <button class="tab" onclick="incTab('Freelance',this)">Freelance</button>
+              <button class="tab" onclick="incTab('Business',this)">Business</button>
+              <button class="tab" onclick="incTab('Investment',this)">Investment</button>
+              <button class="tab" onclick="incTab('Other',this)">Other</button>
+            </div>
+            <div id="inc-table"></div>
+          </div>
+        </div>
+
+        <!-- EXPENSES -->
+        <div id="page-expenses" class="page">
+          <div class="g3">
+            <div class="card">
+              <div class="card-label">This Month</div>
+              <div class="card-value mono text-red" id="exp-total">₱0</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Top Category</div>
+              <div class="card-value mono" style="font-size:17px" id="exp-top">—</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Daily Average</div>
+              <div class="card-value mono" id="exp-daily">₱0</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">All Expenses</div>
+            </div>
+            <div class="toggle-group" id="exp-filters"></div>
+            <div id="exp-table"></div>
+          </div>
+        </div>
+
+        <!-- SCHEDULE -->
+        <div id="page-schedule" class="page">
+          <div class="g3">
+            <div class="card">
+              <div class="card-label">Monthly Recurring</div>
+              <div class="card-value mono" id="sch-mo">₱0</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Due This Week</div>
+              <div class="card-value mono" id="sch-wk">0</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Active Items</div>
+              <div class="card-value mono" id="sch-ct">0</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Scheduled Items</div>
+            </div>
+            <div id="sch-list"></div>
+          </div>
+        </div>
+
+        <!-- BUDGET -->
+        <div id="page-budget" class="page">
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Monthly Budgets</div>
+            </div>
+            <div id="bud-list"></div>
+          </div>
+        </div>
+
+        <!-- GOALS -->
+        <div id="page-goals" class="page">
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Savings Goals</div>
+            </div>
+            <div id="goal-list"></div>
+          </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div id="page-reports" class="page">
+          <div class="g2">
+            <div class="card">
+              <div class="section-header">
+                <div class="section-title">Income vs Expenses</div>
+              </div>
+              <div class="chart-wrap"><canvas id="rep-chart1"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="section-header">
+                <div class="section-title">Spending Breakdown</div>
+              </div>
+              <div class="chart-wrap"><canvas id="rep-chart2"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <div class="section-title">Monthly Summary</div>
+            </div>
+            <div id="rep-table"></div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL -->
+  <div id="modal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Add</div>
+      <div id="modal-body"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn" id="modal-save-btn" onclick="saveModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ══════════════════════════════════════════════
+    //  CONFIG — replace with your Supabase project
+    // ══════════════════════════════════════════════
+    const SUPABASE_URL = 'https://qnbgdiupelyzkdpjyzek.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuYmdkaXVwZWx5emtkcGp5emVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0OTAzMzksImV4cCI6MjA5MTA2NjMzOX0.PlHGVynnLmER2SDXtSLvrLZ0qm1gXUrKtGac5iKIBN0';
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // ══════════════════════════════════════════════
+    //  CONSTANTS
+    // ══════════════════════════════════════════════
+    const CATS = ['Food', 'Transport', 'Housing', 'Health', 'Entertainment', 'Shopping', 'Bills', 'Education', 'Other'];
+    const INC_CATS = ['Salary', 'Freelance', 'Business', 'Investment', 'Other'];
+    const FREQS = ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Yearly'];
+    const CAT_COLORS = {
+      Food: '#f59e0b', Transport: '#3b82f6', Housing: '#a855f7', Health: '#22c55e',
+      Entertainment: '#ef4444', Shopping: '#ec4899', Bills: '#6366f1', Education: '#14b8a6', Other: '#64748b'
+    };
+
+    // ══════════════════════════════════════════════
+    //  STATE
+    // ══════════════════════════════════════════════
+    let user = null;
+    let data = { income: [], expenses: [], schedule: [], budgets: [], goals: [] };
+    let currentPage = 'dashboard';
+    let modalType = '';
+    let incFilter = 'all';
+    let expFilter = 'all';
+    let cfChart, catChart, r1Chart, r2Chart;
+
+    // ══════════════════════════════════════════════
+    //  HELPERS
+    // ══════════════════════════════════════════════
+    const peso = n => '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    const today = () => new Date().toISOString().slice(0, 10);
+    const thisMonth = () => new Date().toISOString().slice(0, 7);
+    const mLabel = m => { const [, mo] = m.split('-'); return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][parseInt(mo) - 1]; };
+    const mInc = m => data.income.filter(i => i.date.startsWith(m)).reduce((s, i) => s + Number(i.amount), 0);
+    const mExp = m => data.expenses.filter(e => e.date.startsWith(m)).reduce((s, e) => s + Number(e.amount), 0);
+
+    function toast(msg, ok = true) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + (ok ? 'ok' : 'err');
+      setTimeout(() => t.className = 'toast', 2800);
+    }
+
+    function catBadge(cat) {
+      const c = CAT_COLORS[cat] || '#64748b';
+      return `<span style="background:${c}22;color:${c};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500">${cat}</span>`;
+    }
+
+    function loading(show) {
+      document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+    }
+
+    function setBtnLoading(id, on) {
+      const b = document.getElementById(id);
+      if (!b) return;
+      b.disabled = on;
+      b.innerHTML = on ? '<span class="spinner"></span>' : b.dataset.label || b.textContent;
+    }
+
+    // ══════════════════════════════════════════════
+    //  AUTH
+    // ══════════════════════════════════════════════
+    function authTab(t) {
+      document.querySelectorAll('.auth-tab').forEach(e => e.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById('login-form').style.display = t === 'login' ? '' : 'none';
+      document.getElementById('signup-form').style.display = t === 'signup' ? '' : 'none';
+      document.getElementById('auth-err').style.display = 'none';
+      document.getElementById('auth-ok').style.display = 'none';
+    }
+
+    async function doLogin() {
+      const email = document.getElementById('l-email').value.trim();
+      const pass = document.getElementById('l-pass').value;
+      if (!email || !pass) return showAuthErr('Please enter your email and password.');
+      setBtnLoading('login-btn', true);
+      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+      setBtnLoading('login-btn', false);
+      if (error) showAuthErr(error.message);
+    }
+
+    async function doSignup() {
+      const name = document.getElementById('s-name').value.trim();
+      const email = document.getElementById('s-email').value.trim();
+      const pass = document.getElementById('s-pass').value;
+      if (!name || !email || !pass) return showAuthErr('Please fill in all fields.');
+      if (pass.length < 6) return showAuthErr('Password must be at least 6 characters.');
+      setBtnLoading('signup-btn', true);
+      const { error } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
+      setBtnLoading('signup-btn', false);
+      if (error) { showAuthErr(error.message); return; }
+      document.getElementById('auth-ok').textContent = 'Account created! Check your email to confirm, then sign in.';
+      document.getElementById('auth-ok').style.display = 'block';
+    }
+
+    async function doSignOut() {
+      await sb.auth.signOut();
+      document.getElementById('app').classList.remove('show');
+      document.getElementById('auth-screen').style.display = 'flex';
+      data = { income: [], expenses: [], schedule: [], budgets: [], goals: [] };
+      user = null;
+    }
+
+    function showAuthErr(msg) {
+      const el = document.getElementById('auth-err');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    // ══════════════════════════════════════════════
+    //  DATA LOADING
+    // ══════════════════════════════════════════════
+    async function loadAll() {
+      const uid = user.id;
+      const [inc, exp, sch, bud, gol] = await Promise.all([
+        sb.from('income').select('*').eq('user_id', uid).order('date', { ascending: false }),
+        sb.from('expenses').select('*').eq('user_id', uid).order('date', { ascending: false }),
+        sb.from('schedule').select('*').eq('user_id', uid).order('next_date'),
+        sb.from('budgets').select('*').eq('user_id', uid),
+        sb.from('goals').select('*').eq('user_id', uid).order('deadline'),
+      ]);
+      data.income = inc.data || [];
+      data.expenses = exp.data || [];
+      data.schedule = sch.data || [];
+      data.budgets = bud.data || [];
+      data.goals = gol.data || [];
+    }
+
+    // ══════════════════════════════════════════════
+    //  NAVIGATION
+    // ══════════════════════════════════════════════
+    const PAGE_TITLES = { dashboard: 'Dashboard', income: 'Income', expenses: 'Expenses', schedule: 'Schedule', budget: 'Budget', goals: 'Goals', reports: 'Reports' };
+
+    function showPage(p) {
+      document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+      document.getElementById('page-' + p).classList.add('active');
+      event && event.currentTarget && event.currentTarget.classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(e => { if (e.textContent.trim() === PAGE_TITLES[p]) e.classList.add('active'); });
+      document.getElementById('page-title').textContent = PAGE_TITLES[p];
+      currentPage = p;
+      renderPage(p);
+    }
+
+    function renderPage(p) {
+      const map = {
+        dashboard: renderDashboard, income: renderIncome, expenses: renderExpenses,
+        schedule: renderSchedule, budget: renderBudget, goals: renderGoals, reports: renderReports
+      };
+      map[p] && map[p]();
+    }
+
+    // ══════════════════════════════════════════════
+    //  DASHBOARD
+    // ══════════════════════════════════════════════
+    function renderDashboard() {
+      const m = thisMonth();
+      const inc = mInc(m), exp = mExp(m), net = inc - exp;
+      const rate = inc > 0 ? Math.round((Math.max(0, net) / inc) * 100) : 0;
+
+      document.getElementById('d-bal').textContent = peso(net);
+      document.getElementById('d-bal').style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
+      document.getElementById('d-bal-sub').textContent = net >= 0 ? 'positive cash flow' : 'spending exceeds income';
+      document.getElementById('d-inc').textContent = peso(inc);
+      document.getElementById('d-exp').textContent = peso(exp);
+      document.getElementById('d-sav').textContent = rate + '%';
+      document.getElementById('d-sav').style.color = rate >= 20 ? 'var(--green)' : rate >= 10 ? 'var(--amber)' : 'var(--red)';
+
+      // recent
+      const all = [...data.income.map(i => ({ ...i, _type: 'income' })), ...data.expenses.map(e => ({ ...e, _type: 'expense' }))]
+        .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
+      const dr = document.getElementById('d-recent');
+      if (!all.length) { dr.innerHTML = '<div class="empty">No transactions yet</div>'; }
+      else dr.innerHTML = `<table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th></tr></thead><tbody>
+    ${all.map(t => `<tr><td class="text-muted">${t.date}</td><td>${t.source || t.description || '—'}</td>
+    <td>${catBadge(t.category)}</td>
+    <td class="${t._type === 'income' ? 'text-green' : 'text-red'} mono">${t._type === 'income' ? '+' : '-'}${peso(t.amount)}</td></tr>`).join('')}
+  </tbody></table>`;
+
+      // upcoming
+      const now = new Date();
+      const up = [...data.schedule].filter(s => s.active).sort((a, b) => new Date(a.next_date) - new Date(b.next_date)).slice(0, 5);
+      const du = document.getElementById('d-upcoming');
+      if (!up.length) { du.innerHTML = '<div class="empty">No scheduled items</div>'; }
+      else du.innerHTML = up.map(s => {
+        const diff = Math.ceil((new Date(s.next_date) - now) / (86400000));
+        const lbl = diff < 0 ? 'overdue' : diff === 0 ? 'today' : `in ${diff}d`;
+        const c = diff < 0 ? 'var(--red)' : diff <= 3 ? 'var(--amber)' : 'var(--text2)';
+        return `<div class="schedule-row">
+      <div class="sched-dot" style="background:${s.type === 'income' ? 'var(--green)' : 'var(--red)'}"></div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${s.name}</div>
+      <div style="font-size:11px;color:var(--text2)">${s.frequency} · <span style="color:${c}">${lbl}</span></div></div>
+      <div class="mono ${s.type === 'income' ? 'text-green' : 'text-red'}" style="font-size:13px;font-weight:500">${s.type === 'income' ? '+' : '-'}${peso(s.amount)}</div>
+    </div>`;
+      }).join('');
+
+      // cashflow chart
+      const months = []; for (let i = 5; i >= 0; i--) { const d = new Date(); d.setMonth(d.getMonth() - i); months.push(d.toISOString().slice(0, 7)); }
+      if (cfChart) cfChart.destroy();
+      cfChart = new Chart(document.getElementById('cf-chart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: months.map(mLabel), datasets: [
+            { label: 'Income', data: months.map(mInc), backgroundColor: 'rgba(34,197,94,.7)', borderRadius: 4 },
+            { label: 'Expenses', data: months.map(mExp), backgroundColor: 'rgba(239,68,68,.7)', borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#8a8a95', font: { size: 11 } } } },
+          scales: {
+            x: { ticks: { color: '#5a5a65' }, grid: { color: 'rgba(255,255,255,.04)' } },
+            y: { ticks: { color: '#5a5a65', callback: v => '₱' + v.toLocaleString() }, grid: { color: 'rgba(255,255,255,.04)' } }
+          }
+        }
+      });
+
+      // category doughnut
+      const ct = {};
+      data.expenses.filter(e => e.date.startsWith(m)).forEach(e => { ct[e.category] = (ct[e.category] || 0) + Number(e.amount); });
+      const ks = Object.keys(ct);
+      const wrap = document.getElementById('cat-chart-wrap');
+      if (catChart) catChart.destroy();
+      if (ks.length) {
+        if (!document.getElementById('cat-chart')) { wrap.innerHTML = '<canvas id="cat-chart"></canvas>'; }
+        catChart = new Chart(document.getElementById('cat-chart').getContext('2d'), {
+          type: 'doughnut',
+          data: { labels: ks, datasets: [{ data: ks.map(k => ct[k]), backgroundColor: ks.map(k => CAT_COLORS[k] || '#64748b'), borderWidth: 0, hoverOffset: 4 }] },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '64%',
+            plugins: { legend: { position: 'right', labels: { color: '#8a8a95', font: { size: 11 }, boxWidth: 10 } } }
+          }
+        });
+      } else {
+        wrap.innerHTML = '<div class="empty" style="height:100%;display:flex;align-items:center;justify-content:center;padding:0">No expense data</div>';
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    //  INCOME
+    // ══════════════════════════════════════════════
+    function incTab(cat, el) {
+      incFilter = cat;
+      document.querySelectorAll('#inc-tabs .tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      renderIncome();
+    }
+    function renderIncome() {
+      const m = thisMonth(), all = data.income, mo = all.filter(i => i.date.startsWith(m));
+      const tot = mo.reduce((s, i) => s + Number(i.amount), 0);
+      document.getElementById('inc-total').textContent = peso(tot);
+      document.getElementById('inc-count').textContent = mo.length;
+      document.getElementById('inc-avg').textContent = mo.length ? peso(tot / mo.length) : '₱0';
+      const list = incFilter === 'all' ? [...all] : all.filter(i => i.category === incFilter);
+      list.sort((a, b) => new Date(b.date) - new Date(a.date));
+      const el = document.getElementById('inc-table');
+      if (!list.length) { el.innerHTML = '<div class="empty">No income records. Click "+ Add" to start tracking.</div>'; return; }
+      el.innerHTML = `<table><thead><tr><th>Date</th><th>Source</th><th>Category</th><th>Notes</th><th>Amount</th><th></th></tr></thead><tbody>
+    ${list.map(i => `<tr><td class="text-muted">${i.date}</td><td>${i.source}</td><td>${catBadge(i.category)}</td>
+    <td class="text-muted">${i.notes || '—'}</td><td class="text-green mono">+${peso(i.amount)}</td>
+    <td><button class="btn btn-ghost btn-xs" onclick="delRecord('income','${i.id}')">✕</button></td></tr>`).join('')}
+  </tbody></table>`;
+    }
+
+    // ══════════════════════════════════════════════
+    //  EXPENSES
+    // ══════════════════════════════════════════════
+    function renderExpenses() {
+      const m = thisMonth(), all = data.expenses, mo = all.filter(e => e.date.startsWith(m));
+      const tot = mo.reduce((s, e) => s + Number(e.amount), 0);
+      document.getElementById('exp-total').textContent = peso(tot);
+      const ct = {}; mo.forEach(e => { ct[e.category] = (ct[e.category] || 0) + Number(e.amount); });
+      const top = Object.entries(ct).sort((a, b) => b[1] - a[1])[0];
+      document.getElementById('exp-top').textContent = top ? top[0] : '—';
+      document.getElementById('exp-daily').textContent = peso(tot / new Date().getDate());
+      const cats = [...new Set(all.map(e => e.category))];
+      document.getElementById('exp-filters').innerHTML =
+        `<button class="toggle ${expFilter === 'all' ? 'active' : ''}" onclick="expTab('all',this)">All</button>`
+        + cats.map(c => `<button class="toggle ${expFilter === c ? 'active' : ''}" onclick="expTab('${c}',this)">${c}</button>`).join('');
+      const list = expFilter === 'all' ? [...all] : all.filter(e => e.category === expFilter);
+      list.sort((a, b) => new Date(b.date) - new Date(a.date));
+      const el = document.getElementById('exp-table');
+      if (!list.length) { el.innerHTML = '<div class="empty">No expenses yet. Click "+ Add" to track spending.</div>'; return; }
+      el.innerHTML = `<table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Notes</th><th>Amount</th><th></th></tr></thead><tbody>
+    ${list.map(e => `<tr><td class="text-muted">${e.date}</td><td>${e.description}</td><td>${catBadge(e.category)}</td>
+    <td class="text-muted">${e.notes || '—'}</td><td class="text-red mono">-${peso(e.amount)}</td>
+    <td><button class="btn btn-ghost btn-xs" onclick="delRecord('expenses','${e.id}')">✕</button></td></tr>`).join('')}
+  </tbody></table>`;
+    }
+    function expTab(cat, el) { expFilter = cat; document.querySelectorAll('#exp-filters .toggle').forEach(t => t.classList.remove('active')); el.classList.add('active'); renderExpenses(); }
+
+    // ══════════════════════════════════════════════
+    //  SCHEDULE
+    // ══════════════════════════════════════════════
+    function renderSchedule() {
+      const now = new Date(), wkEnd = new Date(now); wkEnd.setDate(wkEnd.getDate() + 7);
+      const mo = data.schedule.filter(s => s.active && s.frequency === 'Monthly').reduce((s, i) => s + Number(i.amount), 0);
+      document.getElementById('sch-mo').textContent = peso(mo);
+      document.getElementById('sch-wk').textContent = data.schedule.filter(s => s.active && new Date(s.next_date) <= wkEnd).length;
+      document.getElementById('sch-ct').textContent = data.schedule.filter(s => s.active).length;
+      const el = document.getElementById('sch-list');
+      if (!data.schedule.length) { el.innerHTML = '<div class="empty">No schedules set up yet.</div>'; return; }
+      el.innerHTML = data.schedule.map(s => {
+        const diff = Math.ceil((new Date(s.next_date) - now) / 86400000);
+        const lbl = diff < 0 ? 'Overdue' : diff === 0 ? 'Today' : `In ${diff} days`;
+        const c = diff < 0 ? 'var(--red)' : diff <= 3 ? 'var(--amber)' : 'var(--text2)';
+        return `<div class="schedule-row">
+      <div class="sched-dot" style="background:${s.type === 'income' ? 'var(--green)' : 'var(--red)'}"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${s.name}</div>
+        <div style="font-size:11px;color:var(--text2)">${s.frequency} · Next: ${s.next_date} · <span style="color:${c}">${lbl}</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="mono ${s.type === 'income' ? 'text-green' : 'text-red'}" style="font-size:13px;font-weight:500">${s.type === 'income' ? '+' : '-'}${peso(s.amount)}</div>
+        <button class="btn btn-ghost btn-xs" onclick="markPaid('${s.id}')">✓ Paid</button>
+        <button class="btn btn-ghost btn-xs" onclick="delRecord('schedule','${s.id}')">✕</button>
+      </div>
+    </div>`;
+      }).join('');
+    }
+
+    async function markPaid(id) {
+      const s = data.schedule.find(x => x.id === id); if (!s) return;
+      const tbl = s.type === 'income' ? 'income' : 'expenses';
+      const row = s.type === 'income'
+        ? { user_id: user.id, date: today(), source: s.name, category: 'Other', amount: s.amount, notes: 'Auto from schedule' }
+        : { user_id: user.id, date: today(), description: s.name, category: 'Bills', amount: s.amount, notes: 'Auto from schedule' };
+      await sb.from(tbl).insert(row);
+      const nd = new Date(s.next_date);
+      if (s.frequency === 'Daily') nd.setDate(nd.getDate() + 1);
+      else if (s.frequency === 'Weekly') nd.setDate(nd.getDate() + 7);
+      else if (s.frequency === 'Monthly') nd.setMonth(nd.getMonth() + 1);
+      else if (s.frequency === 'Quarterly') nd.setMonth(nd.getMonth() + 3);
+      else nd.setFullYear(nd.getFullYear() + 1);
+      await sb.from('schedule').update({ next_date: nd.toISOString().slice(0, 10) }).eq('id', id);
+      await loadAll(); renderSchedule(); toast('Marked as paid ✓');
+    }
+
+    // ══════════════════════════════════════════════
+    //  BUDGET
+    // ══════════════════════════════════════════════
+    function renderBudget() {
+      const m = thisMonth(), el = document.getElementById('bud-list');
+      if (!data.budgets.length) { el.innerHTML = '<div class="empty">No budgets set. Click "+ Add" to allocate spending limits.</div>'; return; }
+      el.innerHTML = data.budgets.map(b => {
+        const spent = data.expenses.filter(e => e.date.startsWith(m) && e.category === b.category).reduce((s, e) => s + Number(e.amount), 0);
+        const pct = Math.min(100, Math.round((spent / Number(b.amount)) * 100));
+        const c = pct >= 90 ? 'var(--red)' : pct >= 70 ? 'var(--amber)' : 'var(--green)';
+        return `<div style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <div style="display:flex;align-items:center;gap:8px">${catBadge(b.category)}<span style="font-size:12px;color:var(--text2)">${peso(spent)} / ${peso(b.amount)}</span></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="mono" style="font-size:13px;font-weight:600;color:${c}">${pct}%</span>
+          <button class="btn btn-ghost btn-xs" onclick="delRecord('budgets','${b.id}')">✕</button>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${c}"></div></div>
+    </div>`;
+      }).join('');
+    }
+
+    // ══════════════════════════════════════════════
+    //  GOALS
+    // ══════════════════════════════════════════════
+    function renderGoals() {
+      const el = document.getElementById('goal-list');
+      if (!data.goals.length) { el.innerHTML = '<div class="empty">No savings goals yet. Click "+ Add" to create one.</div>'; return; }
+      el.innerHTML = data.goals.map(g => {
+        const pct = Math.min(100, Math.round((Number(g.current) / Number(g.target)) * 100));
+        const rem = Number(g.target) - Number(g.current);
+        const c = pct >= 100 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--accent)';
+        return `<div style="background:var(--surface2);border-radius:var(--rs);padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <div style="font-size:13px;font-weight:500">${g.name}</div>
+          <div style="font-size:11px;color:var(--text2)">${peso(g.current)} saved · ${rem > 0 ? peso(rem) + ' to go' : '🎉 Reached!'} · Deadline: ${g.deadline}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="mono" style="font-size:13px;font-weight:600;color:${c}">${pct}%</span>
+          <button class="btn btn-ghost btn-xs" onclick="addToGoal('${g.id}','${g.current}')">+ Add</button>
+          <button class="btn btn-ghost btn-xs" onclick="delRecord('goals','${g.id}')">✕</button>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${c}"></div></div>
+    </div>`;
+      }).join('');
+    }
+
+    async function addToGoal(id, cur) {
+      const amt = prompt('Amount to add (₱):');
+      if (!amt || isNaN(amt) || Number(amt) <= 0) return;
+      const newVal = Number(cur) + Number(amt);
+      const { error } = await sb.from('goals').update({ current: newVal }).eq('id', id);
+      if (error) { toast('Error: ' + error.message, false); return; }
+      await loadAll(); renderGoals(); toast(`+${peso(amt)} added to goal ✓`);
+    }
+
+    // ══════════════════════════════════════════════
+    //  REPORTS
+    // ══════════════════════════════════════════════
+    function renderReports() {
+      const months = []; for (let i = 2; i >= 0; i--) { const d = new Date(); d.setMonth(d.getMonth() - i); months.push(d.toISOString().slice(0, 7)); }
+      if (r1Chart) r1Chart.destroy();
+      r1Chart = new Chart(document.getElementById('rep-chart1').getContext('2d'), {
+        type: 'line', data: {
+          labels: months.map(mLabel), datasets: [
+            { label: 'Income', data: months.map(mInc), borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,.1)', fill: true, tension: .4 },
+            { label: 'Expenses', data: months.map(mExp), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.1)', fill: true, tension: .4 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#8a8a95', font: { size: 11 } } } },
+          scales: {
+            x: { ticks: { color: '#5a5a65' }, grid: { color: 'rgba(255,255,255,.04)' } },
+            y: { ticks: { color: '#5a5a65', callback: v => '₱' + v.toLocaleString() }, grid: { color: 'rgba(255,255,255,.04)' } }
+          }
+        }
+      });
+      const m = thisMonth(), ct = {};
+      data.expenses.filter(e => e.date.startsWith(m)).forEach(e => { ct[e.category] = (ct[e.category] || 0) + Number(e.amount); });
+      const ks = Object.keys(ct);
+      if (r2Chart) r2Chart.destroy();
+      if (ks.length) r2Chart = new Chart(document.getElementById('rep-chart2').getContext('2d'), {
+        type: 'bar', data: { labels: ks, datasets: [{ data: ks.map(k => ct[k]), backgroundColor: ks.map(k => CAT_COLORS[k] || '#64748b'), borderRadius: 4 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+          scales: { x: { ticks: { color: '#5a5a65' }, grid: { display: false } }, y: { ticks: { color: '#5a5a65', callback: v => '₱' + v.toLocaleString() }, grid: { color: 'rgba(255,255,255,.04)' } } }
+        }
+      });
+      const el = document.getElementById('rep-table');
+      el.innerHTML = `<table><thead><tr><th>Month</th><th>Income</th><th>Expenses</th><th>Net</th><th>Savings Rate</th></tr></thead><tbody>
+    ${months.map(m => {
+        const i = mInc(m), e = mExp(m), n = i - e; const [, mo] = m.split('-'); const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `<tr><td>${names[parseInt(mo) - 1]}</td><td class="text-green mono">+${peso(i)}</td><td class="text-red mono">-${peso(e)}</td>
+    <td class="mono ${n >= 0 ? 'text-green' : 'text-red'}">${n >= 0 ? '+' : ''}${peso(n)}</td><td>${i > 0 ? Math.round((Math.max(0, n) / i) * 100) + '%' : '—'}</td></tr>`;
+      }).join('')}
+  </tbody></table>`;
+    }
+
+    // ══════════════════════════════════════════════
+    //  MODAL
+    // ══════════════════════════════════════════════
+    function openAdd() {
+      modalType = currentPage;
+      const titles = { dashboard: 'Add Expense', income: 'Add Income', expenses: 'Add Expense', schedule: 'Add Schedule', budget: 'Set Budget', goals: 'Add Goal', reports: 'Add Expense' };
+      document.getElementById('modal-title').textContent = titles[currentPage] || 'Add';
+      document.getElementById('modal-body').innerHTML = getForm(currentPage);
+      document.getElementById('modal').classList.add('show');
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('show'); }
+
+    function getForm(t) {
+      if (t === 'income') return `
+    <div class="fg-row"><div class="fg"><label>Date</label><input type="date" id="f-date" value="${today()}"></div>
+    <div class="fg"><label>Category</label><select id="f-category">${INC_CATS.map(c => `<option>${c}</option>`).join('')}</select></div></div>
+    <div class="fg"><label>Source / Description</label><input type="text" id="f-source" placeholder="e.g. Employer, Client name"></div>
+    <div class="fg"><label>Amount (₱)</label><input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01"></div>
+    <div class="fg"><label>Notes (optional)</label><input type="text" id="f-notes" placeholder="Any notes..."></div>`;
+      if (t === 'schedule') return `
+    <div class="fg"><label>Name</label><input type="text" id="f-name" placeholder="e.g. Rent, Netflix, Salary"></div>
+    <div class="fg-row">
+      <div class="fg"><label>Type</label><select id="f-type"><option value="expense">Expense</option><option value="income">Income</option></select></div>
+      <div class="fg"><label>Frequency</label><select id="f-frequency">${FREQS.map(f => `<option>${f}</option>`).join('')}</select></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label>Amount (₱)</label><input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01"></div>
+      <div class="fg"><label>Next Due Date</label><input type="date" id="f-nextDate" value="${today()}"></div>
+    </div>`;
+      if (t === 'budget') return `
+    <div class="fg"><label>Category</label><select id="f-category">${CATS.map(c => `<option>${c}</option>`).join('')}</select></div>
+    <div class="fg"><label>Monthly Budget (₱)</label><input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01"></div>`;
+      if (t === 'goals') return `
+    <div class="fg"><label>Goal Name</label><input type="text" id="f-name" placeholder="e.g. Emergency Fund, Vacation"></div>
+    <div class="fg-row">
+      <div class="fg"><label>Target (₱)</label><input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01"></div>
+      <div class="fg"><label>Already Saved (₱)</label><input type="number" id="f-current" placeholder="0.00" min="0" step="0.01"></div>
+    </div>
+    <div class="fg"><label>Target Date</label><input type="date" id="f-deadline"></div>`;
+      // default: expense
+      return `
+    <div class="fg-row"><div class="fg"><label>Date</label><input type="date" id="f-date" value="${today()}"></div>
+    <div class="fg"><label>Category</label><select id="f-category">${CATS.map(c => `<option>${c}</option>`).join('')}</select></div></div>
+    <div class="fg"><label>Description</label><input type="text" id="f-description" placeholder="e.g. Grocery, Grab, Dinner"></div>
+    <div class="fg"><label>Amount (₱)</label><input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01"></div>
+    <div class="fg"><label>Notes (optional)</label><input type="text" id="f-notes" placeholder="Any notes..."></div>`;
+    }
+
+    const gv = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+
+    async function saveModal() {
+      const btn = document.getElementById('modal-save-btn');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+      const t = modalType; let row = null; let tbl = '';
+
+      if (t === 'income') {
+        const d = gv('f-date'), s = gv('f-source'), c = gv('f-category'), a = gv('f-amount');
+        if (!d || !s || !a) { toast('Fill in Date, Source & Amount', false); btn.disabled = false; btn.textContent = 'Save'; return; }
+        row = { user_id: user.id, date: d, source: s, category: c, amount: Number(a), notes: gv('f-notes') || null }; tbl = 'income';
+      } else if (t === 'schedule') {
+        const n = gv('f-name'), tp = gv('f-type'), a = gv('f-amount'), f = gv('f-frequency'), nd = gv('f-nextDate');
+        if (!n || !a || !nd) { toast('Fill in all required fields', false); btn.disabled = false; btn.textContent = 'Save'; return; }
+        row = { user_id: user.id, name: n, type: tp, amount: Number(a), frequency: f, next_date: nd, active: true }; tbl = 'schedule';
+      } else if (t === 'budget') {
+        const c = gv('f-category'), a = gv('f-amount');
+        if (!a) { toast('Enter a budget amount', false); btn.disabled = false; btn.textContent = 'Save'; return; }
+        const { error } = await sb.from('budgets').upsert({ user_id: user.id, category: c, amount: Number(a) }, { onConflict: 'user_id,category' });
+        if (error) { toast('Error: ' + error.message, false); } else { toast('Budget saved ✓'); await loadAll(); renderBudget(); }
+        btn.disabled = false; btn.textContent = 'Save'; closeModal(); return;
+      } else if (t === 'goals') {
+        const n = gv('f-name'), a = gv('f-amount'), cur = gv('f-current'), dl = gv('f-deadline');
+        if (!n || !a || !dl) { toast('Fill in all required fields', false); btn.disabled = false; btn.textContent = 'Save'; return; }
+        row = { user_id: user.id, name: n, target: Number(a), current: Number(cur) || 0, deadline: dl }; tbl = 'goals';
+      } else {
+        const d = gv('f-date'), desc = gv('f-description'), c = gv('f-category'), a = gv('f-amount');
+        if (!d || !desc || !a) { toast('Fill in Date, Description & Amount', false); btn.disabled = false; btn.textContent = 'Save'; return; }
+        row = { user_id: user.id, date: d, description: desc, category: c, amount: Number(a), notes: gv('f-notes') || null }; tbl = 'expenses';
+      }
+
+      const { error } = await sb.from(tbl).insert(row);
+      btn.disabled = false; btn.textContent = 'Save';
+      if (error) { toast('Error: ' + error.message, false); return; }
+      toast('Saved ✓');
+      closeModal();
+      await loadAll();
+      const target = t === 'income' ? 'income' : t === 'schedule' ? 'schedule' : t === 'budget' ? 'budget' : t === 'goals' ? 'goals' : 'expenses';
+      renderPage(currentPage);
+    }
+
+    async function delRecord(tbl, id) {
+      if (!confirm('Delete this record?')) return;
+      const { error } = await sb.from(tbl).delete().eq('id', id);
+      if (error) { toast('Error: ' + error.message, false); return; }
+      await loadAll(); renderPage(currentPage); toast('Deleted');
+    }
+
+    // ══════════════════════════════════════════════
+    //  BOOT
+    // ══════════════════════════════════════════════
+    async function boot() {
+      document.getElementById('top-date').textContent = new Date().toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      sb.auth.onAuthStateChange(async (event, session) => {
+        if (session?.user) {
+          user = session.user;
+          document.getElementById('auth-screen').style.display = 'none';
+          loading(true);
+          await loadAll();
+          loading(false);
+          document.getElementById('app').classList.add('show');
+          const name = user.user_metadata?.full_name || user.email || 'User';
+          document.getElementById('user-name').textContent = name;
+          document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+          renderDashboard();
+        } else {
+          document.getElementById('app').classList.remove('show');
+          document.getElementById('auth-screen').style.display = 'flex';
+          loading(false);
+        }
+      });
+
+      // Get current session
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) loading(false);
+    }
+
+    boot();
+  </script>
+</body>
+
+</html>
