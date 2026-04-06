@@ -143,11 +143,113 @@
       display: none
     }
 
-    /* ── APP SHELL ── */
     #app {
       display: none;
       height: 100vh;
       flex-direction: row
+    }
+
+    /* ── MOBILE NAV ── */
+    .mobile-header {
+      display: none;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      z-index: 100
+    }
+
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 8px 12px 24px; /* extra bottom for safe area */
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(10px)
+    }
+
+    .m-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text2);
+      font-size: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit
+    }
+
+    .m-nav-item.active {
+      color: var(--accent)
+    }
+
+    .m-nav-icon {
+      font-size: 18px
+    }
+
+    @media (max-width: 768px) {
+      #app {
+        flex-direction: column
+      }
+
+      .sidebar {
+        display: none
+      }
+
+      .mobile-header {
+        display: flex
+      }
+
+      .bottom-nav {
+        display: flex
+      }
+
+      .main {
+        height: calc(100vh - 120px); /* header + bottom nav */
+      }
+
+      .topbar {
+        padding: 10px 20px
+      }
+
+      .content {
+        padding: 16px 20px 80px
+      }
+
+      .g4, .g3, .g2 {
+        grid-template-columns: 1fr;
+        gap: 12px
+      }
+
+      .card-value {
+        font-size: 22px
+      }
+      
+      .modal {
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        margin-top: 0
+      }
+      
+      table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch
+      }
     }
 
     #app.show {
@@ -786,17 +888,26 @@
       <button class="nav-item" onclick="showPage('budget')"><span class="nav-icon">▤</span>Budget</button>
       <button class="nav-item" onclick="showPage('goals')"><span class="nav-icon">◎</span>Goals</button>
       <button class="nav-item" onclick="showPage('reports')"><span class="nav-icon">◱</span>Reports</button>
-      <div class="sidebar-footer">
-        <button class="user-pill" onclick="doSignOut()">
-          <div class="user-avatar" id="user-avatar">?</div>
-          <div style="flex:1;text-align:left;overflow:hidden">
-            <div
-              style="font-size:12px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
-              id="user-name">User</div>
-            <div style="font-size:10px;color:var(--text3)">Sign out</div>
           </div>
         </button>
       </div>
+    </nav>
+
+    <!-- MOBILE HEADER -->
+    <header class="mobile-header">
+      <div class="sidebar-logo" style="padding:0">
+        <div class="logo-dot"></div>FinFlow
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="doSignOut()">Log Out</button>
+    </header>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="m-nav-item active" onclick="showPage('dashboard')"><span class="m-nav-icon">⊞</span><span>Home</span></button>
+      <button class="m-nav-item" onclick="showPage('income')"><span class="m-nav-icon">↓</span><span>In</span></button>
+      <button class="m-nav-item" onclick="showPage('expenses')"><span class="m-nav-icon">↑</span><span>Out</span></button>
+      <button class="m-nav-item" onclick="showPage('budget')"><span class="m-nav-icon">▤</span><span>Budget</span></button>
+      <button class="m-nav-item" onclick="showPage('goals')"><span class="m-nav-icon">◎</span><span>Goals</span></button>
     </nav>
 
     <main class="main">
@@ -1147,9 +1258,23 @@
     function showPage(p) {
       document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+      document.querySelectorAll('.m-nav-item').forEach(e => e.classList.remove('active'));
+      
       document.getElementById('page-' + p).classList.add('active');
-      event && event.currentTarget && event.currentTarget.classList.add('active');
-      document.querySelectorAll('.nav-item').forEach(e => { if (e.textContent.trim() === PAGE_TITLES[p]) e.classList.add('active'); });
+      
+      // Update sidebar
+      document.querySelectorAll('.nav-item').forEach(e => {
+        if (e.innerText.includes(PAGE_TITLES[p])) e.classList.add('active');
+      });
+
+      // Update mobile nav
+      const mItems = document.querySelectorAll('.m-nav-item');
+      if (p === 'dashboard') mItems[0].classList.add('active');
+      else if (p === 'income') mItems[1].classList.add('active');
+      else if (p === 'expenses') mItems[2].classList.add('active');
+      else if (p === 'budget') mItems[3].classList.add('active');
+      else if (p === 'goals') mItems[4].classList.add('active');
+
       document.getElementById('page-title').textContent = PAGE_TITLES[p];
       currentPage = p;
       renderPage(p);
@@ -1551,30 +1676,50 @@
     //  BOOT
     // ══════════════════════════════════════════════
     async function boot() {
+      // 1. Setup UI details
       document.getElementById('top-date').textContent = new Date().toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-      sb.auth.onAuthStateChange(async (event, session) => {
-        if (session?.user) {
-          user = session.user;
-          document.getElementById('auth-screen').style.display = 'none';
-          loading(true);
-          await loadAll();
+      // 2. Hard timeout (6s) — Safety net to prevent infinite spinner
+      const safetyTimeout = setTimeout(() => {
+        if (document.getElementById('loading-overlay').style.display !== 'none') {
+          console.warn('Boot timed out after 6s. Dropping to screen state.');
           loading(false);
-          document.getElementById('app').classList.add('show');
+          if (!user) {
+            document.getElementById('app').classList.remove('show');
+            document.getElementById('auth-screen').style.display = 'flex';
+          }
+        }
+      }, 6000);
+
+      // 3. Robust Session Check (Direct)
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) {
+          user = session.user;
           const name = user.user_metadata?.full_name || user.email || 'User';
           document.getElementById('user-name').textContent = name;
           document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+          
+          await loadAll();
+          document.getElementById('auth-screen').style.display = 'none';
+          document.getElementById('app').classList.add('show');
           renderDashboard();
-        } else {
-          document.getElementById('app').classList.remove('show');
-          document.getElementById('auth-screen').style.display = 'flex';
-          loading(false);
+        }
+      } catch (err) {
+        console.error('Session check failed:', err);
+      } finally {
+        loading(false);
+        clearTimeout(safetyTimeout);
+      }
+
+      // 4. Background Auth Listener
+      sb.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN') {
+          location.reload(); // Refresh to ensure clean state
+        } else if (event === 'SIGNED_OUT') {
+          doSignOut();
         }
       });
-
-      // Get current session
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) loading(false);
     }
 
     boot();
