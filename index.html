@@ -199,251 +199,6 @@
       font-size: 18px
     }
 
-    @media (max-width: 768px) {
-      body {
-        overflow: auto;
-        -webkit-text-size-adjust: 100%
-      }
-
-      #app {
-        flex-direction: column;
-        height: 100dvh
-      }
-
-      .sidebar {
-        display: none
-      }
-
-      .mobile-header {
-        display: flex;
-        position: sticky;
-        top: 0;
-        padding: 12px 16px env(safe-area-inset-right) env(safe-area-inset-left)
-      }
-
-      .bottom-nav {
-        display: flex;
-        padding: 8px 8px calc(12px + env(safe-area-inset-bottom))
-      }
-
-      .m-nav-item {
-        gap: 3px;
-        font-size: 10px;
-        padding: 6px 4px;
-        min-width: 48px;
-        min-height: 44px
-      }
-
-      .m-nav-icon {
-        font-size: 20px
-      }
-
-      .main {
-        flex: 1;
-        height: auto;
-        min-height: 0;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column
-      }
-
-      .topbar {
-        padding: 10px 16px;
-        position: sticky;
-        top: 0;
-        z-index: 10
-      }
-
-      .topbar-left h1 {
-        font-size: 16px
-      }
-
-      .content {
-        flex: 1;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        padding: 14px 14px calc(80px + env(safe-area-inset-bottom))
-      }
-
-      .g4 {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px
-      }
-
-      .g3 {
-        grid-template-columns: 1fr;
-        gap: 10px
-      }
-
-      .g2 {
-        grid-template-columns: 1fr;
-        gap: 12px
-      }
-
-      .card {
-        padding: 14px
-      }
-
-      .card-label {
-        font-size: 10px
-      }
-
-      .card-value {
-        font-size: 20px
-      }
-
-      .card-sub {
-        font-size: 10px
-      }
-
-      .chart-wrap {
-        height: 200px
-      }
-
-      .modal-overlay {
-        align-items: flex-end
-      }
-
-      .modal {
-        width: 100%;
-        max-width: 100%;
-        max-height: 92vh;
-        border-radius: 16px 16px 0 0;
-        padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
-        animation: slideUp .25s ease-out
-      }
-
-      @keyframes slideUp {
-        from {
-          transform: translateY(100%)
-        }
-
-        to {
-          transform: translateY(0)
-        }
-      }
-
-      .fg-row {
-        grid-template-columns: 1fr;
-        gap: 0
-      }
-
-      input,
-      select,
-      textarea {
-        font-size: 16px;
-        padding: 10px 12px;
-        min-height: 44px
-      }
-
-      .btn {
-        min-height: 44px;
-        padding: 10px 16px;
-        font-size: 14px
-      }
-
-      .btn-sm {
-        min-height: 36px;
-        padding: 6px 12px;
-        font-size: 13px
-      }
-
-      .btn-xs {
-        min-height: 32px;
-        padding: 4px 10px;
-        font-size: 12px
-      }
-
-      table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch
-      }
-
-      th {
-        font-size: 10px;
-        padding: 6px 8px
-      }
-
-      td {
-        font-size: 12px;
-        padding: 8px
-      }
-
-      .schedule-row {
-        flex-wrap: wrap;
-        gap: 8px;
-        padding: 12px
-      }
-
-      .section-header {
-        flex-wrap: wrap;
-        gap: 8px
-      }
-
-      .toggle-group {
-        flex-wrap: wrap;
-        gap: 6px
-      }
-
-      .toggle {
-        padding: 6px 12px;
-        font-size: 12px
-      }
-
-      .tabs {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        width: 100%;
-        flex-wrap: nowrap
-      }
-
-      .tab {
-        white-space: nowrap;
-        padding: 6px 12px;
-        font-size: 12px
-      }
-
-      .toast {
-        left: 14px;
-        right: 14px;
-        bottom: calc(80px + env(safe-area-inset-bottom));
-        max-width: none
-      }
-
-      .auth-card {
-        padding: 28px 20px;
-        border-radius: var(--r);
-        width: 100%;
-        max-width: 95vw
-      }
-
-      .auth-logo {
-        font-size: 20px;
-        margin-bottom: 22px
-      }
-    }
-
-    /* Extra small phones */
-    @media (max-width: 380px) {
-      .g4 {
-        grid-template-columns: 1fr;
-        gap: 8px
-      }
-
-      .card-value {
-        font-size: 18px
-      }
-
-      .content {
-        padding: 12px 10px calc(80px + env(safe-area-inset-bottom))
-      }
-
-      .m-nav-item {
-        font-size: 9px
-      }
-    }
 
     #app.show {
       display: flex
@@ -1017,6 +772,285 @@
       border-color: rgba(239, 68, 68, .35);
       color: var(--red)
     }
+
+    /* ══════════════════════════════════════════════
+       MOBILE — must be LAST to override base styles
+       ══════════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      body {
+        overflow: auto;
+        -webkit-text-size-adjust: 100%
+      }
+
+      #app,
+      #app.show {
+        flex-direction: column;
+        height: 100dvh
+      }
+
+      .sidebar {
+        display: none !important
+      }
+
+      .mobile-header {
+        display: flex;
+        position: sticky;
+        top: 0;
+        padding: 12px 16px;
+        padding-right: env(safe-area-inset-right);
+        padding-left: env(safe-area-inset-left)
+      }
+
+      .bottom-nav {
+        display: flex;
+        padding: 8px 8px calc(12px + env(safe-area-inset-bottom))
+      }
+
+      .m-nav-item {
+        gap: 3px;
+        font-size: 10px;
+        padding: 6px 4px;
+        min-width: 48px;
+        min-height: 44px
+      }
+
+      .m-nav-icon {
+        font-size: 20px
+      }
+
+      .main {
+        flex: 1;
+        height: auto;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column
+      }
+
+      .topbar {
+        padding: 10px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 10
+      }
+
+      .topbar-left h1 {
+        font-size: 16px
+      }
+
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 14px 14px calc(80px + env(safe-area-inset-bottom))
+      }
+
+      .g4 {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px
+      }
+
+      .g3 {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px
+      }
+
+      .g2 {
+        grid-template-columns: 1fr;
+        gap: 12px
+      }
+
+      .card {
+        padding: 14px
+      }
+
+      .card-label {
+        font-size: 10px
+      }
+
+      .card-value {
+        font-size: 20px
+      }
+
+      .card-sub {
+        font-size: 10px
+      }
+
+      .chart-wrap {
+        height: 200px
+      }
+
+      .modal-overlay {
+        align-items: flex-end
+      }
+
+      .modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: 92vh;
+        border-radius: 16px 16px 0 0;
+        padding: 20px 16px calc(16px + env(safe-area-inset-bottom));
+        animation: slideUp .25s ease-out
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(100%)
+        }
+
+        to {
+          transform: translateY(0)
+        }
+      }
+
+      .fg-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px
+      }
+
+      input,
+      select,
+      textarea {
+        font-size: 16px;
+        padding: 10px 12px;
+        min-height: 44px
+      }
+
+      .btn {
+        min-height: 44px;
+        padding: 10px 16px;
+        font-size: 14px
+      }
+
+      .btn-sm {
+        min-height: 36px;
+        padding: 6px 12px;
+        font-size: 13px
+      }
+
+      .btn-xs {
+        min-height: 32px;
+        padding: 4px 10px;
+        font-size: 12px
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch
+      }
+
+      th {
+        font-size: 10px;
+        padding: 6px 8px
+      }
+
+      td {
+        font-size: 12px;
+        padding: 8px
+      }
+
+      .schedule-row {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px
+      }
+
+      .section-header {
+        flex-wrap: wrap;
+        gap: 8px
+      }
+
+      .toggle-group {
+        flex-wrap: wrap;
+        gap: 6px
+      }
+
+      .toggle {
+        padding: 6px 12px;
+        font-size: 12px
+      }
+
+      .tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        flex-wrap: nowrap
+      }
+
+      .tab {
+        white-space: nowrap;
+        padding: 6px 12px;
+        font-size: 12px
+      }
+
+      .toast {
+        left: 14px;
+        right: 14px;
+        bottom: calc(80px + env(safe-area-inset-bottom));
+        max-width: none
+      }
+
+      .auth-card {
+        padding: 28px 20px;
+        border-radius: var(--r);
+        width: 100%;
+        max-width: 95vw
+      }
+
+      .auth-logo {
+        font-size: 20px;
+        margin-bottom: 22px
+      }
+    }
+
+    /* Small phones */
+    @media (max-width: 480px) {
+      .g4 {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px
+      }
+
+      .g3 {
+        grid-template-columns: 1fr;
+        gap: 8px
+      }
+
+      .g2 {
+        grid-template-columns: 1fr;
+        gap: 10px
+      }
+
+      .fg-row {
+        grid-template-columns: 1fr;
+        gap: 0
+      }
+
+      .card-value {
+        font-size: 18px
+      }
+
+      .content {
+        padding: 12px 12px calc(80px + env(safe-area-inset-bottom))
+      }
+    }
+
+    /* Extra small phones */
+    @media (max-width: 360px) {
+      .g4 {
+        grid-template-columns: 1fr;
+        gap: 8px
+      }
+
+      .card-value {
+        font-size: 16px
+      }
+
+      .m-nav-item {
+        font-size: 9px
+      }
+    }
   </style>
 </head>
 
@@ -1046,7 +1080,8 @@
 
       <div id="login-form">
         <div class="fg"><label>Email</label><input type="email" id="l-email" placeholder="you@example.com"></div>
-        <div class="fg"><label>Password</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+        <div class="fg"><label>Password</label><input type="password" id="l-pass" placeholder="••••••••"
+            onkeydown="if(event.key==='Enter')doLogin()"></div>
         <button class="btn" style="width:100%;justify-content:center" onclick="doLogin()" id="login-btn">Sign
           In</button>
       </div>
@@ -1341,6 +1376,7 @@
     //  STATE
     // ══════════════════════════════════════════════
     let user = null;
+    let dashboardShowing = false;
     let data = { income: [], expenses: [], schedule: [], budgets: [], goals: [] };
     let currentPage = 'dashboard';
     let modalType = '';
@@ -1377,8 +1413,14 @@
     function setBtnLoading(id, on) {
       const b = document.getElementById(id);
       if (!b) return;
-      b.disabled = on;
-      b.innerHTML = on ? '<span class="spinner"></span>' : b.dataset.label || b.textContent;
+      if (on) {
+        b.dataset.label = b.textContent;
+        b.disabled = true;
+        b.innerHTML = '<span class="spinner"></span>';
+      } else {
+        b.disabled = false;
+        b.textContent = b.dataset.label || 'Submit';
+      }
     }
 
     // ══════════════════════════════════════════════
@@ -1398,12 +1440,22 @@
       const pass = document.getElementById('l-pass').value;
       if (!email || !pass) return showAuthErr('Please enter your email and password.');
       setBtnLoading('login-btn', true);
-      const { data: loginData, error } = await sb.auth.signInWithPassword({ email, password: pass });
-      setBtnLoading('login-btn', false);
-      if (error) { showAuthErr(error.message); return; }
-      if (loginData?.session) {
-        user = loginData.session.user;
-        await showDashboard();
+      try {
+        const { data: loginData, error } = await sb.auth.signInWithPassword({ email, password: pass });
+        setBtnLoading('login-btn', false);
+        if (error) { showAuthErr(error.message); return; }
+        if (loginData?.session) {
+          user = loginData.session.user;
+          dashboardShowing = false; // reset guard
+          await showDashboard();
+        } else if (loginData?.user && !loginData?.session) {
+          showAuthErr('Please confirm your email address before signing in.');
+        } else {
+          showAuthErr('Login failed. Please try again.');
+        }
+      } catch (err) {
+        setBtnLoading('login-btn', false);
+        showAuthErr('Connection error: ' + (err.message || 'Check your internet.'));
       }
     }
 
@@ -1414,16 +1466,29 @@
       if (!name || !email || !pass) return showAuthErr('Please fill in all fields.');
       if (pass.length < 6) return showAuthErr('Password must be at least 6 characters.');
       setBtnLoading('signup-btn', true);
-      const { error } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
-      setBtnLoading('signup-btn', false);
-      if (error) { showAuthErr(error.message); return; }
-      document.getElementById('auth-ok').textContent = 'Account created! You can now sign in.';
-      document.getElementById('auth-ok').style.display = 'block';
-      authTab('login');
+      try {
+        const { data: signupData, error } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
+        setBtnLoading('signup-btn', false);
+        if (error) { showAuthErr(error.message); return; }
+        // If email confirmation is off, Supabase returns a session immediately
+        if (signupData?.session) {
+          user = signupData.session.user;
+          dashboardShowing = false;
+          await showDashboard();
+        } else {
+          document.getElementById('auth-ok').textContent = 'Account created! Check your email to confirm, then sign in.';
+          document.getElementById('auth-ok').style.display = 'block';
+          authTab('login');
+        }
+      } catch (err) {
+        setBtnLoading('signup-btn', false);
+        showAuthErr('Connection error: ' + (err.message || 'Check your internet.'));
+      }
     }
 
     async function doSignOut() {
       user = null;
+      dashboardShowing = false;
       data = { income: [], expenses: [], schedule: [], budgets: [], goals: [] };
       document.getElementById('app').classList.remove('show');
       document.getElementById('auth-screen').style.display = 'flex';
@@ -1432,21 +1497,41 @@
 
     function showAuthErr(msg) {
       const el = document.getElementById('auth-err');
-      el.textContent = typeof msg === 'string' ? msg : JSON.stringify(msg);
+      const text = typeof msg === 'string' ? msg : JSON.stringify(msg);
+      // Common Supabase error messages — make them user-friendly
+      if (text.toLowerCase().includes('email not confirmed')) {
+        el.textContent = 'Your email is not confirmed. Go to Supabase → Authentication → Providers → Email → toggle OFF "Confirm email", then try again.';
+      } else if (text.toLowerCase().includes('invalid login')) {
+        el.textContent = 'Invalid email or password. Please check your credentials and try again.';
+      } else {
+        el.textContent = text;
+      }
       el.style.display = 'block';
       document.getElementById('auth-ok').style.display = 'none';
     }
 
     async function showDashboard() {
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('app').classList.add('show');
-      loading(true);
-      await loadAll();
-      loading(false);
-      const name = user.user_metadata?.full_name || user.email || 'User';
-      document.getElementById('user-name').textContent = name;
-      document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
-      renderDashboard();
+      if (dashboardShowing) return;
+      dashboardShowing = true;
+      try {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app').classList.add('show');
+        loading(true);
+        try { await loadAll(); } catch (loadErr) { console.error('loadAll failed:', loadErr); }
+        loading(false);
+        const name = user?.user_metadata?.full_name || user?.email || 'User';
+        const nameEl = document.getElementById('user-name');
+        const avatarEl = document.getElementById('user-avatar');
+        if (nameEl) nameEl.textContent = name;
+        if (avatarEl) avatarEl.textContent = name.charAt(0).toUpperCase();
+        renderDashboard();
+      } catch (e) {
+        console.error('showDashboard error:', e);
+        loading(false);
+        // Still show dashboard even if rendering fails
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app').classList.add('show');
+      }
     }
 
     // ══════════════════════════════════════════════
@@ -1924,6 +2009,7 @@
         } else if (event === 'SIGNED_OUT') {
           // Just reset UI — do NOT call doSignOut() to avoid loop
           user = null;
+          dashboardShowing = false;
           data = { income: [], expenses: [], schedule: [], budgets: [], goals: [] };
           document.getElementById('app').classList.remove('show');
           document.getElementById('auth-screen').style.display = 'flex';
