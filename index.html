@@ -152,7 +152,9 @@
     /* ── MOBILE NAV ── */
     .mobile-header {
       display: none;
-      padding: 12px 20px;
+      padding: 12px 24px;
+      padding-right: calc(24px + env(safe-area-inset-right));
+      padding-left: calc(24px + env(safe-area-inset-left));
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       align-items: center;
@@ -317,7 +319,7 @@
     }
 
     .topbar {
-      padding: 14px 24px;
+      padding: 14px 32px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -340,7 +342,7 @@
     .content {
       flex: 1;
       overflow-y: auto;
-      padding: 22px 24px
+      padding: 22px 32px
     }
 
     /* ── BUTTONS ── */
@@ -1116,6 +1118,8 @@
       <button class="nav-item" onclick="showPage('budget')"><span class="nav-icon">▤</span>Budget</button>
       <button class="nav-item" onclick="showPage('goals')"><span class="nav-icon">◎</span>Goals</button>
       <button class="nav-item" onclick="showPage('reports')"><span class="nav-icon">◱</span>Reports</button>
+      <div class="nav-section">Account</div>
+      <button class="nav-item" onclick="showPage('profile')"><span class="nav-icon">⚙</span>Profile</button>
       <div class="sidebar-footer">
         <button class="user-pill" onclick="doSignOut()">
           <div class="user-avatar" id="user-avatar">U</div>
@@ -1143,6 +1147,8 @@
           class="m-nav-icon">▤</span><span>Budget</span></button>
       <button class="m-nav-item" onclick="showPage('goals')"><span
           class="m-nav-icon">◎</span><span>Goals</span></button>
+      <button class="m-nav-item" onclick="showPage('profile')"><span
+          class="m-nav-icon">⚙</span><span>Profile</span></button>
     </nav>
 
     <main class="main">
@@ -1333,6 +1339,27 @@
               <div class="section-title">Monthly Summary</div>
             </div>
             <div id="rep-table"></div>
+          </div>
+        </div>
+
+        <!-- PROFILE -->
+        <div id="page-profile" class="page">
+          <div class="g2">
+            <div class="card">
+              <div class="section-header">
+                <div class="section-title">User Information</div>
+              </div>
+              <div class="fg"><label>Display Name</label><input type="text" id="p-name" placeholder="John Doe"></div>
+              <div class="fg"><label>Email Address</label><input type="email" id="p-email" readonly style="opacity:0.5"></div>
+              <button class="btn" style="width:100%;justify-content:center" onclick="updateProfile()">Update Profile</button>
+            </div>
+            <div class="card" style="border-color: var(--red-d)">
+              <div class="section-header">
+                <div class="section-title" style="color: var(--red)">Danger Zone</div>
+              </div>
+              <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Clear all your income, expenses, budgets, and goals. This action cannot be undone.</p>
+              <button class="btn btn-danger" style="width:100%;justify-content:center" onclick="resetAppData()">Reset All Data</button>
+            </div>
           </div>
         </div>
 
@@ -1556,7 +1583,7 @@
     // ══════════════════════════════════════════════
     //  NAVIGATION
     // ══════════════════════════════════════════════
-    const PAGE_TITLES = { dashboard: 'Dashboard', income: 'Income', expenses: 'Expenses', schedule: 'Schedule', budget: 'Budget', goals: 'Goals', reports: 'Reports' };
+    const PAGE_TITLES = { dashboard: 'Dashboard', income: 'Income', expenses: 'Expenses', schedule: 'Schedule', budget: 'Budget', goals: 'Goals', reports: 'Reports', profile: 'Profile' };
 
     function showPage(p) {
       document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
@@ -1577,6 +1604,7 @@
       else if (p === 'expenses') mItems[2].classList.add('active');
       else if (p === 'budget') mItems[3].classList.add('active');
       else if (p === 'goals') mItems[4].classList.add('active');
+      else if (p === 'profile') mItems[5].classList.add('active');
 
       document.getElementById('page-title').textContent = PAGE_TITLES[p];
       currentPage = p;
@@ -1586,7 +1614,7 @@
     function renderPage(p) {
       const map = {
         dashboard: renderDashboard, income: renderIncome, expenses: renderExpenses,
-        schedule: renderSchedule, budget: renderBudget, goals: renderGoals, reports: renderReports
+        schedule: renderSchedule, budget: renderBudget, goals: renderGoals, reports: renderReports, profile: renderProfile
       };
       map[p] && map[p]();
     }
@@ -1877,6 +1905,59 @@
     <td class="mono ${n >= 0 ? 'text-green' : 'text-red'}">${n >= 0 ? '+' : ''}${peso(n)}</td><td>${i > 0 ? Math.round((Math.max(0, n) / i) * 100) + '%' : '—'}</td></tr>`;
       }).join('')}
   </tbody></table>`;
+    }
+
+    // ══════════════════════════════════════════════
+    //  PROFILE
+    // ══════════════════════════════════════════════
+    function renderProfile() {
+      const name = user?.user_metadata?.full_name || user?.email || 'User';
+      document.getElementById('p-name').value = name;
+      document.getElementById('p-email').value = user?.email || '';
+    }
+
+    async function updateProfile() {
+      const newName = document.getElementById('p-name').value.trim();
+      if (!newName) return toast('Name cannot be empty', false);
+
+      const { data: updateData, error } = await sb.auth.updateUser({
+        data: { full_name: newName }
+      });
+
+      if (error) { toast('Error updating profile: ' + error.message, false); }
+      else {
+        user = updateData.user;
+        const nameEl = document.getElementById('user-name');
+        const avatarEl = document.getElementById('user-avatar');
+        if (nameEl) nameEl.textContent = newName;
+        if (avatarEl) avatarEl.textContent = newName.charAt(0).toUpperCase();
+
+        toast('Profile updated ✓');
+      }
+    }
+
+    async function resetAppData() {
+      if (!confirm('Are you absolutely sure? This will delete ALL your income, expenses, budgets, and goals permanently.')) return;
+      if (!confirm('Last chance: All data will be wiped.')) return;
+
+      loading(true);
+      try {
+        const uid = user.id;
+        await Promise.all([
+          sb.from('income').delete().eq('user_id', uid),
+          sb.from('expenses').delete().eq('user_id', uid),
+          sb.from('schedule').delete().eq('user_id', uid),
+          sb.from('budgets').delete().eq('user_id', uid),
+          sb.from('goals').delete().eq('user_id', uid)
+        ]);
+        toast('All app data reset ✓');
+        await loadAll();
+        showPage('dashboard');
+      } catch (e) {
+        toast('Error resetting data: ' + e.message, false);
+      } finally {
+        loading(false);
+      }
     }
 
     // ══════════════════════════════════════════════
